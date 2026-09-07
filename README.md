@@ -19,6 +19,4 @@ install.packages("parallelly")
 install.packages("arrow")
 ```
 
-You can see the generated html here: [Exported results in html](https://gafo25.github.io/Rperformance/Basic_perf.html) 
-
-
+You can see the generated html here: [Exported results in html](https://gafo25.github.io/Rperformance/) 
