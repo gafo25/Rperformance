@@ -1,16 +1,20 @@
 ---
 title: "Performance in R 4.5.1 using microbenchmark"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
-output: 
-  html_document:
-    theme: 
-      # version: 4
-      # bootswatch: darkly
-      version: 5
-      bootswatch: vapor
+toc: true
+format:
+  html:
+    theme:
+      dark: darkly
+      light: flatly
+    theme-toggle: true
+    embed-resources: true
+execute:
+  warning: false
 ---
 
-```{r setup, include = FALSE}
+
+```{r, include = FALSE}
 # options(warn = -1)
 suppressMessages({
   library(data.table)
@@ -24,14 +28,17 @@ suppressMessages({
   library(parallelly)
   library(parallel)
   library(stringr)
-  library(duckdb)
-  library(arrow)
+  library(jsonlite)
+  library(DT)
+#   library(duckdb)
+#   library(arrow)
 })
 
 source("./other_functions.R")
+list_theme_options <- get_theme_values()
 setDTthreads(threads = 4)
-knitr::opts_chunk$set(echo = TRUE)
 ```
+
 # Basic R
 ## Cast dates
 ```{r, echo = TRUE}
@@ -52,8 +59,8 @@ m1<-microbenchmark(
 print(m1)
 ```
 
-```{r, warning = FALSE}
-fbox_plot(m1, "microseconds")
+```{r}
+fbox_plot(m1, "microseconds", list_theme_options)
 ```
 
 ## Explicit vector length vector("type", length) is faster than an empty vector c()
@@ -78,8 +85,8 @@ m3 <- microbenchmark(
 print(m3)
 ```
 
-```{r, warning = FALSE}
-fbox_plot(m3, "microseconds")
+```{r}
+fbox_plot(m3, "microseconds", list_theme_options)
 ```
 
 ## which function is slow for some simple situations
@@ -101,8 +108,8 @@ m4 <- microbenchmark(
 print(m4)
 ```
 
-```{r, warning = FALSE}
-fbox_plot(m4, "miliseconds")
+```{r}
+fbox_plot(m4, "miliseconds", list_theme_options)
 ```
 
 ## Column operation is faster than row operation
@@ -126,8 +133,8 @@ m5 <- microbenchmark(
 print(m5)
 ```
 
-```{r, warning = FALSE}
-fbox_plot(m5, "microseconds")
+```{r}
+fbox_plot(m5, "microseconds", list_theme_options)
 ```
 
 ## Sequences function safer than 1:n
@@ -150,8 +157,8 @@ m6<-microbenchmark(
 print(m6)
 ```
 
-```{r, warning = FALSE}
-fbox_plot(m6, "miliseconds")
+```{r}
+fbox_plot(m6, "miliseconds", list_theme_options)
 ```
 
 ## paste0 is faster than glue
@@ -175,8 +182,8 @@ m7 <- microbenchmark(
 print(m7)
 ```
 
-```{r, warning = FALSE}
-fbox_plot(m7, "miliseconds")
+```{r}
+fbox_plot(m7, "miliseconds", list_theme_options)
 ```
 
 ## for loop vs lapply
@@ -200,8 +207,8 @@ m8 <- microbenchmark(
 print(m8)
 ```
 
-```{r, warning = FALSE}
-fbox_plot(m8, "miliseconds")
+```{r}
+fbox_plot(m8, "miliseconds", list_theme_options)
 ```
 # data.table package functions
 ## Date vs IDate
@@ -233,8 +240,8 @@ m9 <- microbenchmark(
 print(m9)
 ```
 
-```{r, warning = FALSE}
-fbox_plot(m9, "miliseconds")
+```{r}
+fbox_plot(m9, "miliseconds", list_theme_options)
 ```
 
 ## Base R switch vs Dplyr case_when (for simple tasks)
@@ -265,8 +272,8 @@ m10 <- microbenchmark(
 print(m10)
 ```
 
-```{r, warning = FALSE}
-fbox_plot(m10, "microseconds")
+```{r}
+fbox_plot(m10, "microseconds", list_theme_options)
 ```
 
 ## data.table fcase vs Dplyr case_when
@@ -301,8 +308,8 @@ m11 <- microbenchmark(
 print(m11)
 ```
 
-```{r, warning = FALSE}
-fbox_plot(m11, "miliseconds")
+```{r}
+fbox_plot(m11, "miliseconds", list_theme_options)
 ```
 
 ## data.table fcoalesce vs tidyr replace_na
@@ -335,8 +342,8 @@ m12 <- microbenchmark(
 print(m12)
 ```
 
-```{r, warning = FALSE}
-fbox_plot(m12, "miliseconds")
+```{r}
+fbox_plot(m12, "miliseconds", list_theme_options)
 ```
 
 ## data.table notation vs dplyr notation
@@ -367,8 +374,8 @@ m13 <- microbenchmark(
 print(m13)
 ```
 
-```{r, warning = FALSE}
-fbox_plot(m13, "microseconds")
+```{r}
+fbox_plot(m13, "microseconds", list_theme_options)
 ```
 
 ## data.table melt vs tidyr pivot_longer
@@ -397,8 +404,8 @@ m14 <- microbenchmark(
 print(m14)
 ```
 
-```{r, warning = FALSE}
-fbox_plot(m14, "microseconds")
+```{r}
+fbox_plot(m14, "microseconds", list_theme_options)
 ```
 
 ## data.table CJ vs tidyr expand_grid
@@ -426,8 +433,8 @@ m15 <- microbenchmark(
 print(m15)
 ```
 
-```{r, warning = FALSE}
-fbox_plot(m15, "microseconds")
+```{r}
+fbox_plot(m15, "microseconds", list_theme_options)
 ```
 
 ## data.table rbindlist vs R rbind
@@ -462,8 +469,8 @@ m16 <- microbenchmark(
 print(m16)
 ```
 
-```{r, warning = FALSE}
-fbox_plot(m16, "microseconds")
+```{r}
+fbox_plot(m16, "microseconds", list_theme_options)
 ```
 
 ## stringr word vs tidyr separate vs data.table tstrsplit
@@ -504,8 +511,8 @@ m17 <- microbenchmark(
 print(m17)
 ```
 
-```{r, warning = FALSE}
-fbox_plot(m17, "miliseconds")
+```{r}
+fbox_plot(m17, "miliseconds", list_theme_options)
 ```
 
 ## data.table na_omit vs dplyr drop_na
@@ -535,8 +542,8 @@ m18 <- microbenchmark(
 print(m18)
 ```
 
-```{r, warning = FALSE}
-fbox_plot(m18, "microseconds")
+```{r}
+fbox_plot(m18, "microseconds", list_theme_options)
 ```
 # Parallel processing
 ## lapply vs parallel mclapply
@@ -577,8 +584,8 @@ m19 <- microbenchmark(
 print(m19)
 ```
 
-```{r, warning = FALSE}
-fbox_plot(m19, "miliseconds")
+```{r}
+fbox_plot(m19, "miliseconds", list_theme_options)
 ```
 # dtplyr
 This is another alternative (You need to install this package)
@@ -623,94 +630,10 @@ m21 <- microbenchmark(
 print(m21)
 ```
 
-```{r, warning = FALSE}
-fbox_plot(m21, "miliseconds")
+```{r}
+fbox_plot(m21, "miliseconds", list_theme_options)
 ```
 
 # Duckdb
-## Dockdb files vs parquet
-Parquet files may take longer if you partitioned by day. Consider to try partitioning by year or try to use duckdb. Another advantage using duckdb is memory consumption since you can wrangle using SQL statement.
-
-Note: DuckDB requires to open a connection, consider the parameter read_only if you only want to get data. Don't forget to close the connection.
-```{r, warning = FALSE}
-# partitioned_by_day <- "/conf/posit_azure_logs/data/merge_uip_data_test"
-partitioned_by_year <- "/conf/posit_azure_logs/test_290825/data/merge_uip_data_test"
-my_duckdb <- "/conf/posit_azure_logs/test_290825/data/my_db.duckdb"
-
-with_parquet <- function(folder_path){
-  data_1 <- open_dataset(file.path(folder_path)) |>
-    select(
-      ALL_WIP_CP_day_session, ALL_WIP_CP_night_session,
-      ALL_WIP_BP_day_session, ALL_WIP_BP_night_session,
-      ALL_WIP_CP_DS_mem_limit, ALL_WIP_CP_NS_mem_limit,
-      ALL_WIP_BP_DS_mem_limit, ALL_WIP_BP_NS_mem_limit,
-      ALL_WIP_CP_DS_mem_request, ALL_WIP_CP_NS_mem_request,
-      ALL_WIP_BP_DS_mem_request, ALL_WIP_BP_NS_mem_request,
-      ALL_WIP_CP_DS_mem_max, ALL_WIP_CP_NS_mem_max,
-      ALL_WIP_BP_DS_mem_max, ALL_WIP_BP_NS_mem_max,
-      ALL_WIP_CP_node_total, ALL_WIP_BP_node_total
-    ) |>
-    mutate(
-      computepool_node_mem = ALL_WIP_CP_node_total * (160 * 1024),
-      bigpool_node_mem = ALL_WIP_BP_node_total * (256 * 1024),
-      ALL_WIP_day_session = ALL_WIP_CP_day_session + ALL_WIP_BP_day_session,
-      ALL_WIP_night_session = ALL_WIP_CP_night_session + ALL_WIP_BP_night_session,
-      ALL_WIP_node_total = ALL_WIP_CP_node_total + ALL_WIP_BP_node_total,
-      total_mem_limit = ALL_WIP_CP_DS_mem_limit + ALL_WIP_CP_NS_mem_limit + ALL_WIP_BP_DS_mem_limit + ALL_WIP_BP_NS_mem_limit,
-      total_mem_request = ALL_WIP_CP_DS_mem_request + ALL_WIP_CP_NS_mem_request + ALL_WIP_BP_DS_mem_request + ALL_WIP_BP_NS_mem_request,
-      total_mem_max = ALL_WIP_CP_DS_mem_max + ALL_WIP_CP_NS_mem_max + ALL_WIP_BP_DS_mem_max + ALL_WIP_BP_NS_mem_max,
-      total_node_mem = computepool_node_mem + bigpool_node_mem,
-      average_session_per_node = ifelse(ALL_WIP_node_total != 0,
-                                         (ALL_WIP_day_session + ALL_WIP_night_session) / ALL_WIP_node_total, 0)
-    ) |>
-    arrange(ALL_WIP_CP_day_session, ALL_WIP_CP_night_session, ALL_WIP_BP_day_session) |> 
-    collect() |>
-    as.data.table()
-}
-
-with_duckfile <- function(my_path){
-  my_connection = dbConnect(duckdb::duckdb(), dbdir = my_path, read_only=TRUE)
-  data_2 <- res_duckdb_sql <- dbGetQuery(
-    my_connection,
-    statement = "select
-        ALL_WIP_CP_day_session, ALL_WIP_CP_night_session,
-        ALL_WIP_BP_day_session, ALL_WIP_BP_night_session,
-        ALL_WIP_CP_DS_mem_limit, ALL_WIP_CP_NS_mem_limit,
-        ALL_WIP_BP_DS_mem_limit, ALL_WIP_BP_NS_mem_limit,
-        ALL_WIP_CP_DS_mem_request, ALL_WIP_CP_NS_mem_request,
-        ALL_WIP_BP_DS_mem_request, ALL_WIP_BP_NS_mem_request,
-        ALL_WIP_CP_DS_mem_max, ALL_WIP_CP_NS_mem_max,
-        ALL_WIP_BP_DS_mem_max, ALL_WIP_BP_NS_mem_max,
-        ALL_WIP_CP_node_total, ALL_WIP_BP_node_total,
-        ALL_WIP_CP_node_total * 160 * 1024 as computepool_node_mem,
-        ALL_WIP_BP_node_total * 256 * 1024 as bigpool_node_mem,
-        ALL_WIP_CP_day_session + ALL_WIP_BP_day_session as ALL_WIP_day_session,
-        ALL_WIP_CP_night_session + ALL_WIP_BP_night_session as ALL_WIP_night_session,
-        ALL_WIP_CP_node_total + ALL_WIP_BP_node_total as ALL_WIP_node_total,
-        ALL_WIP_CP_DS_mem_limit + ALL_WIP_CP_NS_mem_limit + ALL_WIP_BP_DS_mem_limit + ALL_WIP_BP_NS_mem_limit as total_mem_limit,
-        ALL_WIP_CP_DS_mem_request + ALL_WIP_CP_NS_mem_request + ALL_WIP_BP_DS_mem_request + ALL_WIP_BP_NS_mem_request as total_mem_request,
-        ALL_WIP_CP_DS_mem_max + ALL_WIP_CP_NS_mem_max + ALL_WIP_BP_DS_mem_max + ALL_WIP_BP_NS_mem_max as total_mem_max,
-        computepool_node_mem + bigpool_node_mem as total_node_mem,
-        CASE 
-          WHEN ALL_WIP_node_total != 0 THEN (ALL_WIP_day_session + ALL_WIP_night_session) / ALL_WIP_node_total
-          ELSE 0
-        END AS average_session_per_node
-      from mytable order by ALL_WIP_CP_day_session, ALL_WIP_CP_night_session, ALL_WIP_BP_day_session",
-    immediate = TRUE) |> 
-    as.data.table()
-  
-  dbDisconnect(my_connection, shutdown = TRUE)
-}
-
-m22 <- microbenchmark(
-  duckdb_file = with_duckfile(my_duckdb),
-  parquet_by_year = with_parquet(partitioned_by_year),
-  times = 2
-)
-
-print(m22)
-```
-
-```{r, warning = FALSE}
-fbox_plot(m22, "miliseconds")
-```
+## DuckDB files vs parquet
+Parquet files may take longer if they are partitioned by day. Consider trying partitioning by year or use a DuckDB file instead. The are various advantages when using DuckDB like memory consumption (wrangle data using SQL statement), have more than 1 table, create views, encrypt the file and update table values instead of overwriting parquet files from scratch.
